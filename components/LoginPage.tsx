@@ -46,11 +46,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen page-dots flex items-center justify-center px-5 py-12">
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle />
-      </div>
+    <div className="relative min-h-screen page-dots flex flex-col">
+      <header className="sticky top-0 z-10 border-b border-notion bg-notion-page/70 backdrop-blur-md">
+        <div className="max-w-xl mx-auto px-5 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-notion flex items-center justify-center dark:bg-stone-200">
+              <BookmarkIcon className="w-3.5 h-3.5 text-notion-page" />
+            </div>
+            <span className="text-sm font-medium text-notion tracking-tight">
+              markbook
+            </span>
+          </div>
+          <ThemeToggle />
+        </div>
+      </header>
 
+      <div className="flex-1 flex items-center justify-center px-5 py-12">
       <div className="w-full max-w-[400px]">
         <div className="panel p-8 shadow-panel">
           <div className="w-10 h-10 rounded-xl bg-notion flex items-center justify-center mb-6 dark:bg-stone-200">
@@ -108,6 +119,7 @@ export default function LoginPage() {
         <p className="mt-6 text-center text-xs text-notion-faint">
           Your bookmarks stay private to your account.
         </p>
+      </div>
       </div>
     </div>
   );

@@ -50,17 +50,23 @@ export default function Header({ user }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-10 border-b border-notion bg-notion-page/70 backdrop-blur-md">
-      <div className="max-w-xl mx-auto px-5 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-notion flex items-center justify-center dark:bg-stone-200">
-            <BookmarkIcon className="w-3.5 h-3.5 text-notion-page" />
+      <div className="max-w-xl mx-auto px-5 h-14 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-notion flex items-center justify-center shrink-0 dark:bg-stone-200">
+              <BookmarkIcon className="w-3.5 h-3.5 text-notion-page" />
+            </div>
+            <span className="text-sm font-medium text-notion tracking-tight truncate">
+              markbook
+            </span>
           </div>
-          <span className="text-sm font-medium text-notion tracking-tight">
-            markbook
-          </span>
+
+          <div className="h-4 w-px bg-notion shrink-0" aria-hidden />
+
+          <ThemeToggle />
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2 shrink-0">
           <div className="hidden sm:flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border border-notion bg-notion-surface/50">
             {avatarUrl ? (
               <img
@@ -75,15 +81,15 @@ export default function Header({ user }: HeaderProps) {
                 </span>
               </div>
             )}
-            <span className="text-sm text-notion-muted">{displayName}</span>
+            <span className="text-sm text-notion-muted max-w-[120px] truncate">
+              {displayName}
+            </span>
           </div>
-
-          <ThemeToggle />
 
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="btn-ghost"
+            className="btn-ghost text-sm"
           >
             {isLoggingOut ? "Signing out…" : "Sign out"}
           </button>

@@ -46,27 +46,21 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
   const mounted = useThemeMounted();
 
-  if (!mounted) {
-    return (
-      <button
-        type="button"
-        className={`btn-ghost p-2 !px-2 ${className}`}
-        aria-label="Toggle theme"
-        disabled
-      >
-        <span className="w-4 h-4" />
-      </button>
-    );
-  }
-
   return (
     <button
       type="button"
       onClick={toggleTheme}
-      className={`btn-ghost p-2 !px-2 ${className}`}
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      disabled={!mounted}
+      className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border border-notion text-notion-muted hover:text-notion hover:bg-notion-surface/80 transition-colors disabled:opacity-40 ${className}`}
+      aria-label={
+        mounted
+          ? theme === "dark"
+            ? "Switch to light mode"
+            : "Switch to dark mode"
+          : "Toggle theme"
+      }
     >
-      {theme === "dark" ? (
+      {mounted && theme === "dark" ? (
         <SunIcon className="w-4 h-4" />
       ) : (
         <MoonIcon className="w-4 h-4" />
