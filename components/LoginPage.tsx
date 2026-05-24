@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import ThemeToggle from "./ThemeToggle";
 
 function BookmarkIcon({ className }: { className?: string }) {
   return (
@@ -44,11 +45,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen page-dots flex items-center justify-center px-5 py-12">
+    <div className="relative min-h-screen page-dots flex items-center justify-center px-5 py-12">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+
       <div className="w-full max-w-[400px]">
         <div className="panel p-8 shadow-panel">
-          <div className="w-10 h-10 rounded-xl bg-notion flex items-center justify-center mb-6">
-            <BookmarkIcon className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-notion flex items-center justify-center mb-6 dark:bg-stone-200">
+            <BookmarkIcon className="w-5 h-5 text-notion-page" />
           </div>
 
           <h1 className="text-2xl font-semibold text-notion tracking-tight">
@@ -60,7 +65,7 @@ export default function LoginPage() {
 
           <div className="mt-8 pt-8 border-t border-notion">
             {error && (
-              <p className="mb-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              <p className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/40 border border-red-100 dark:border-red-900/50 rounded-lg px-3 py-2">
                 {error}
               </p>
             )}
@@ -68,7 +73,7 @@ export default function LoginPage() {
             <button
               onClick={handleGoogleLogin}
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2.5 text-sm font-medium text-notion bg-white border border-notion hover:bg-stone-50 px-4 py-2.5 rounded-lg transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2.5 text-sm font-medium text-notion bg-notion-elevated border border-notion hover:bg-notion-surface px-4 py-2.5 rounded-lg transition-colors disabled:opacity-50"
             >
               {isLoading ? (
                 <span className="text-notion-muted">Signing in…</span>

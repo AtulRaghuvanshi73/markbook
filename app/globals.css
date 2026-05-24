@@ -3,16 +3,44 @@
 @tailwind utilities;
 
 :root {
-  --notion-text: 55 53 47;
-  --notion-muted: 120 119 116;
-  --notion-faint: 155 154 151;
-  --notion-page: 250 250 249;
-  --accent: 37 99 235;
+  --c-text: 55 53 47;
+  --c-muted: 120 119 116;
+  --c-faint: 155 154 151;
+  --c-page: 250 250 249;
+  --c-bg: 255 255 255;
+  --c-surface: 247 246 243;
+  --c-elevated: 255 255 255;
+  --border-notion: rgba(55, 53, 47, 0.09);
+  --shadow-panel: 0 1px 2px rgba(55, 53, 47, 0.04), 0 4px 12px rgba(55, 53, 47, 0.03);
+  --c-btn-primary: 55 53 47;
+  --c-btn-primary-hover: 47 45 40;
+  --c-input-bg: 250 250 249;
+  --c-hover: 0 0 0;
+  --c-hover-alpha: 0.04;
+  --c-accent: 37 99 235;
+}
+
+.dark {
+  --c-text: 227 226 224;
+  --c-muted: 155 154 151;
+  --c-faint: 115 114 111;
+  --c-page: 25 25 23;
+  --c-bg: 37 37 35;
+  --c-surface: 47 47 44;
+  --c-elevated: 42 42 40;
+  --border-notion: rgba(255, 255, 255, 0.09);
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
+  --c-btn-primary: 227 226 224;
+  --c-btn-primary-hover: 255 255 255;
+  --c-input-bg: 30 30 28;
+  --c-hover: 255 255 255;
+  --c-hover-alpha: 0.06;
+  --c-accent: 96 165 250;
 }
 
 body {
-  color: rgb(var(--notion-text));
-  background: rgb(var(--notion-page));
+  color: rgb(var(--c-text));
+  background: rgb(var(--c-page));
   font-family:
     ui-sans-serif,
     -apple-system,
@@ -25,33 +53,61 @@ body {
 }
 
 ::selection {
-  background: rgba(37, 99, 235, 0.15);
+  background: rgba(var(--c-accent), 0.2);
 }
 
 @layer components {
   .page-dots {
-    background-color: rgb(var(--notion-page));
+    background-color: rgb(var(--c-page));
     background-image: radial-gradient(
-      rgba(55, 53, 47, 0.08) 1px,
+      rgba(var(--c-text), 0.08) 1px,
       transparent 1px
     );
     background-size: 20px 20px;
   }
 
   .panel {
-    @apply bg-white border border-notion rounded-xl shadow-sm;
+    @apply rounded-xl border;
+    background-color: rgb(var(--c-elevated));
+    border-color: var(--border-notion);
+    box-shadow: var(--shadow-panel);
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 text-sm font-medium text-white bg-notion hover:bg-[#2f2d28] px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    background-color: rgb(var(--c-btn-primary));
+    color: rgb(var(--c-page));
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background-color: rgb(var(--c-btn-primary-hover));
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center text-sm text-notion-muted hover:text-notion hover:bg-black/[0.04] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50;
+    @apply inline-flex items-center justify-center text-sm px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50;
+    color: rgb(var(--c-muted));
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    color: rgb(var(--c-text));
+    background-color: rgba(var(--c-hover), var(--c-hover-alpha));
   }
 
   .input-field {
-    @apply w-full text-sm text-notion placeholder:text-notion-faint bg-stone-50/80 border border-notion rounded-lg px-3 py-2.5 transition-colors focus:outline-none focus:bg-white focus:border-stone-300 focus:ring-2 focus:ring-blue-500/10;
+    @apply w-full text-sm rounded-lg px-3 py-2.5 transition-colors focus:outline-none focus:ring-2;
+    color: rgb(var(--c-text));
+    background-color: rgba(var(--c-input-bg), 0.8);
+    border: 1px solid var(--border-notion);
+  }
+
+  .input-field::placeholder {
+    color: rgb(var(--c-faint));
+  }
+
+  .input-field:focus {
+    background-color: rgb(var(--c-elevated));
+    border-color: rgba(var(--c-text), 0.2);
+    --tw-ring-color: rgba(var(--c-accent), 0.15);
   }
 }
 

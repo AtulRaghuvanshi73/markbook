@@ -121,11 +121,11 @@ export default function BookmarkForm({ onBookmarkAdded }: BookmarkFormProps) {
               if (urlError) setUrlError(null);
             }}
             placeholder="https://example.com"
-            className={`input-field ${urlError ? "border-red-200 focus:ring-red-500/10" : ""}`}
+            className={`input-field ${urlError ? "!border-red-300 dark:!border-red-800 focus:!ring-red-500/20" : ""}`}
             aria-invalid={!!urlError}
           />
           {urlError && (
-            <p className="mt-1.5 text-xs text-red-600">{urlError}</p>
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{urlError}</p>
           )}
         </div>
 
@@ -145,11 +145,11 @@ export default function BookmarkForm({ onBookmarkAdded }: BookmarkFormProps) {
               if (titleError) setTitleError(null);
             }}
             placeholder="What is this link about?"
-            className={`input-field ${titleError ? "border-red-200 focus:ring-red-500/10" : ""}`}
+            className={`input-field ${titleError ? "!border-red-300 dark:!border-red-800 focus:!ring-red-500/20" : ""}`}
             aria-invalid={!!titleError}
           />
           {titleError && (
-            <p className="mt-1.5 text-xs text-red-600">{titleError}</p>
+            <p className="mt-1.5 text-xs text-red-600 dark:text-red-400">{titleError}</p>
           )}
         </div>
 
@@ -158,8 +158,8 @@ export default function BookmarkForm({ onBookmarkAdded }: BookmarkFormProps) {
             <p
               className={`text-xs ${
                 feedback.type === "success"
-                  ? "text-emerald-600"
-                  : "text-red-600"
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-red-600 dark:text-red-400"
               }`}
             >
               {feedback.message}

@@ -1,8 +1,13 @@
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AuthCodeError() {
   return (
-    <div className="min-h-screen page-dots flex items-center justify-center px-5">
+    <div className="relative min-h-screen page-dots flex items-center justify-center px-5">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+
       <div className="panel max-w-sm p-8 shadow-panel text-center">
         <h1 className="text-xl font-semibold text-notion tracking-tight">
           Authentication error
@@ -10,7 +15,7 @@ export default function AuthCodeError() {
         <p className="mt-2 text-[15px] text-notion-muted">
           Something went wrong during sign in. Please try again.
         </p>
-        <Link href="/" className="btn-primary mt-6 w-full">
+        <Link href="/" className="btn-primary mt-6 w-full inline-flex">
           Back to sign in
         </Link>
       </div>

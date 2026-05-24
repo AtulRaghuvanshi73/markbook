@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import ThemeToggle from "./ThemeToggle";
 
 interface HeaderProps {
   user: User;
@@ -48,19 +49,19 @@ export default function Header({ user }: HeaderProps) {
     "User";
 
   return (
-    <header className="sticky top-0 z-10 border-b border-notion bg-white/70 backdrop-blur-md">
+    <header className="sticky top-0 z-10 border-b border-notion bg-notion-page/70 backdrop-blur-md">
       <div className="max-w-xl mx-auto px-5 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-notion flex items-center justify-center">
-            <BookmarkIcon className="w-3.5 h-3.5 text-white" />
+          <div className="w-7 h-7 rounded-lg bg-notion flex items-center justify-center dark:bg-stone-200">
+            <BookmarkIcon className="w-3.5 h-3.5 text-notion-page" />
           </div>
           <span className="text-sm font-medium text-notion tracking-tight">
             markbook
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border border-notion bg-stone-50/50">
+        <div className="flex items-center gap-1">
+          <div className="hidden sm:flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border border-notion bg-notion-surface/50">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
@@ -76,6 +77,8 @@ export default function Header({ user }: HeaderProps) {
             )}
             <span className="text-sm text-notion-muted">{displayName}</span>
           </div>
+
+          <ThemeToggle />
 
           <button
             onClick={handleLogout}

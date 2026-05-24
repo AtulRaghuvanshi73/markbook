@@ -15,7 +15,7 @@ export default function BookmarkList({
   if (bookmarks.length === 0) {
     return (
       <div className="panel py-12 px-6 text-center shadow-panel">
-        <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center mx-auto mb-4">
+        <div className="w-10 h-10 rounded-xl bg-notion-surface flex items-center justify-center mx-auto mb-4">
           <svg
             className="w-5 h-5 text-notion-faint"
             fill="none"

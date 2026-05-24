@@ -72,7 +72,7 @@ export default function BookmarkItem({ bookmark, onDeleted }: BookmarkItemProps)
 
   if (showConfirm) {
     return (
-      <div className="panel px-4 py-3 border-red-100 bg-red-50/30">
+      <div className="panel px-4 py-3 !border-red-200 dark:!border-red-900/50 bg-red-50/50 dark:bg-red-950/30">
         <p className="text-sm text-notion truncate">
           Delete &ldquo;{bookmark.title}&rdquo;?
         </p>
@@ -99,7 +99,7 @@ export default function BookmarkItem({ bookmark, onDeleted }: BookmarkItemProps)
   return (
     <div className="group panel px-3 py-3 hover:shadow-panel transition-shadow">
       <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-stone-50 border border-notion flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-lg bg-notion-surface border border-notion flex items-center justify-center flex-shrink-0">
           {!faviconError ? (
             <img
               src={faviconUrl}
@@ -133,7 +133,7 @@ export default function BookmarkItem({ bookmark, onDeleted }: BookmarkItemProps)
             href={bookmark.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-1.5 rounded-md text-notion-faint hover:text-notion hover:bg-stone-100 transition-colors"
+            className="p-1.5 rounded-md text-notion-faint hover:text-notion hover:bg-notion-surface transition-colors"
             title="Open"
           >
             <svg
@@ -152,7 +152,7 @@ export default function BookmarkItem({ bookmark, onDeleted }: BookmarkItemProps)
           </a>
           <button
             onClick={() => setShowConfirm(true)}
-            className="p-1.5 rounded-md text-notion-faint hover:text-red-500 hover:bg-red-50 transition-colors"
+            className="p-1.5 rounded-md text-notion-faint hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
             title="Delete"
           >
             <svg
