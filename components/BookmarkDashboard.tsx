@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import BookmarkForm from "./BookmarkForm";
 import BookmarkList from "./BookmarkList";
@@ -23,21 +23,10 @@ export default function BookmarkDashboard({
   userId,
 }: BookmarkDashboardProps) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const fetchBookmarks = useCallback(async () => {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("bookmarks")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (data) setBookmarks(data);
-  }, []);
 
   useEffect(() => {
     const supabase = createClient();
 
-    // Subscribe to realtime changes
     const channel = supabase
       .channel("bookmarks-realtime")
       .on(
@@ -68,14 +57,12 @@ export default function BookmarkDashboard({
       )
       .subscribe();
 
-    // Cleanup subscription on unmount
     return () => {
       supabase.removeChannel(channel);
     };
   }, [userId]);
 
   const handleBookmarkAdded = (newBookmark: Bookmark) => {
-    // Optimistically add — realtime will also trigger but deduplicate is handled via id check
     setBookmarks((prev) => {
       if (prev.some((b) => b.id === newBookmark.id)) return prev;
       return [newBookmark, ...prev];
@@ -88,23 +75,21 @@ export default function BookmarkDashboard({
 
   return (
     <div className="space-y-6">
-      {/* Page heading */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">My Bookmarks</h1>
-        <p className="text-slate-500 text-sm mt-1">
+        <h1 className="text-2xl font-semibold text-notion tracking-tight">
+          Bookmarks
+        </h1>
+        <p className="text-notion-muted text-sm mt-1">
           {bookmarks.length === 0
-            ? "Start saving your favorite links"
-            : `${bookmarks.length} bookmark${bookmarks.length !== 1 ? "s" : ""} saved`}
+            ? "Add your first link below"
+            : `${bookmarks.length} saved`}
         </p>
       </div>
 
-      {/* Add bookmark form */}
       <BookmarkForm onBookmarkAdded={handleBookmarkAdded} />
 
-      {/* Bookmark list */}
       <BookmarkList
         bookmarks={bookmarks}
-        isLoading={isLoading}
         onBookmarkDeleted={handleBookmarkDeleted}
       />
     </div>

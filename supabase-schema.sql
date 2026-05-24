@@ -1,5 +1,5 @@
 -- =====================================================
--- Smart Bookmark App - Supabase Schema & RLS Policies
+-- markbook App - Supabase Schema & RLS Policies
 -- Run this in the Supabase SQL Editor
 -- =====================================================
 

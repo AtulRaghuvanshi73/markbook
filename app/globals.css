@@ -1,29 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-rgb: 248, 250, 252;
+  --notion-text: 55 53 47;
+  --notion-muted: 120 119 116;
+  --notion-faint: 155 154 151;
+  --notion-page: 250 250 249;
+  --accent: 37 99 235;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-rgb));
-  font-family: 'Inter', system-ui, sans-serif;
+  color: rgb(var(--notion-text));
+  background: rgb(var(--notion-page));
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Helvetica,
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(37, 99, 235, 0.15);
+}
+
+@layer components {
+  .page-dots {
+    background-color: rgb(var(--notion-page));
+    background-image: radial-gradient(
+      rgba(55, 53, 47, 0.08) 1px,
+      transparent 1px
+    );
+    background-size: 20px 20px;
+  }
+
+  .panel {
+    @apply bg-white border border-notion rounded-xl shadow-sm;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 text-sm font-medium text-white bg-notion hover:bg-[#2f2d28] px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center text-sm text-notion-muted hover:text-notion hover:bg-black/[0.04] px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50;
+  }
+
+  .input-field {
+    @apply w-full text-sm text-notion placeholder:text-notion-faint bg-stone-50/80 border border-notion rounded-lg px-3 py-2.5 transition-colors focus:outline-none focus:bg-white focus:border-stone-300 focus:ring-2 focus:ring-blue-500/10;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
-}
-
-/* Smooth transitions */
-* {
-  transition-property: color, background-color, border-color, box-shadow;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
 }

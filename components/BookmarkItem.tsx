@@ -51,14 +51,6 @@ export default function BookmarkItem({ bookmark, onDeleted }: BookmarkItemProps)
   const [isDeleting, setIsDeleting] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
 
-  const handleDeleteClick = () => {
-    setShowConfirm(true);
-  };
-
-  const handleCancelDelete = () => {
-    setShowConfirm(false);
-  };
-
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
     const supabase = createClient();
@@ -78,176 +70,107 @@ export default function BookmarkItem({ bookmark, onDeleted }: BookmarkItemProps)
   const faviconUrl = getFaviconUrl(bookmark.url);
   const hostname = getHostname(bookmark.url);
 
+  if (showConfirm) {
+    return (
+      <div className="panel px-4 py-3 border-red-100 bg-red-50/30">
+        <p className="text-sm text-notion truncate">
+          Delete &ldquo;{bookmark.title}&rdquo;?
+        </p>
+        <div className="flex items-center gap-2 mt-3">
+          <button
+            onClick={handleConfirmDelete}
+            disabled={isDeleting}
+            className="text-xs font-medium text-white bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-md transition-colors disabled:opacity-50"
+          >
+            {isDeleting ? "Deleting…" : "Delete"}
+          </button>
+          <button
+            onClick={() => setShowConfirm(false)}
+            disabled={isDeleting}
+            className="btn-ghost text-xs !px-3 !py-1.5"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={`bg-white rounded-2xl border transition-all ${
-        showConfirm
-          ? "border-red-200 shadow-sm"
-          : "border-slate-100 hover:border-slate-200 hover:shadow-sm"
-      }`}
-    >
-      {!showConfirm ? (
-        <div className="flex items-center gap-3 p-4">
-          {/* Favicon */}
-          <div className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {!faviconError ? (
-              <img
-                src={faviconUrl}
-                alt={hostname}
-                width={20}
-                height={20}
-                onError={() => setFaviconError(true)}
-                className="w-5 h-5 object-contain"
+    <div className="group panel px-3 py-3 hover:shadow-panel transition-shadow">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-lg bg-stone-50 border border-notion flex items-center justify-center flex-shrink-0">
+          {!faviconError ? (
+            <img
+              src={faviconUrl}
+              alt=""
+              width={18}
+              height={18}
+              onError={() => setFaviconError(true)}
+              className="w-[18px] h-[18px] object-contain"
+            />
+          ) : (
+            <span className="w-4 h-4 rounded bg-notion-surface" />
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <a
+            href={bookmark.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-sm font-medium text-notion truncate hover:text-accent transition-colors"
+          >
+            {bookmark.title}
+          </a>
+          <p className="text-xs text-notion-faint truncate mt-0.5">
+            {hostname} · {formatDate(bookmark.created_at)}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-0.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <a
+            href={bookmark.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-1.5 rounded-md text-notion-faint hover:text-notion hover:bg-stone-100 transition-colors"
+            title="Open"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
               />
-            ) : (
-              <svg
-                className="w-4 h-4 text-slate-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                />
-              </svg>
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <a
-              href={bookmark.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block text-sm font-medium text-slate-800 hover:text-brand-600 truncate leading-snug"
+            </svg>
+          </a>
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="p-1.5 rounded-md text-notion-faint hover:text-red-500 hover:bg-red-50 transition-colors"
+            title="Delete"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
             >
-              {bookmark.title}
-            </a>
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className="text-xs text-slate-400 truncate">
-                {hostname}
-              </span>
-              <span className="text-slate-200 text-xs">·</span>
-              <span className="text-xs text-slate-400 flex-shrink-0">
-                {formatDate(bookmark.created_at)}
-              </span>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <a
-              href={bookmark.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-brand-500 hover:bg-brand-50"
-              title="Open link"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
-            </a>
-            <button
-              onClick={handleDeleteClick}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50"
-              title="Delete bookmark"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-            </button>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+          </button>
         </div>
-      ) : (
-        // Confirmation step
-        <div className="p-4">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <svg
-                className="w-4 h-4 text-red-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-800">
-                Delete this bookmark?
-              </p>
-              <p className="text-xs text-slate-500 mt-0.5 truncate">
-                &ldquo;{bookmark.title}&rdquo; will be permanently removed.
-              </p>
-              <div className="flex items-center gap-2 mt-3">
-                <button
-                  onClick={handleConfirmDelete}
-                  disabled={isDeleting}
-                  className="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg disabled:opacity-60"
-                >
-                  {isDeleting ? (
-                    <svg
-                      className="animate-spin w-3 h-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                  ) : null}
-                  {isDeleting ? "Deleting..." : "Yes, delete"}
-                </button>
-                <button
-                  onClick={handleCancelDelete}
-                  disabled={isDeleting}
-                  className="text-xs font-medium text-slate-600 hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-100"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }
