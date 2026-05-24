@@ -1,3 +1,4 @@
+import { authCallbackRedirect } from "@/lib/auth-redirect";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -8,6 +9,11 @@ type CookieToSet = {
 };
 
 export async function updateSession(request: NextRequest) {
+  const callbackUrl = authCallbackRedirect(request);
+  if (callbackUrl) {
+    return NextResponse.redirect(callbackUrl);
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
