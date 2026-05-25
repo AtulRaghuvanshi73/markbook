@@ -1,7 +1,7 @@
 "use client";
 
 import type { BookmarkSort } from "@/lib/bookmarks";
-import { SORT_LABELS } from "@/lib/bookmarks";
+import { SORT_LABELS, SORT_OPTIONS } from "@/lib/bookmarks";
 
 interface BookmarkToolbarProps {
   searchQuery: string;
@@ -26,7 +26,7 @@ export default function BookmarkToolbar({
     searchQuery.trim().length > 0 && filteredCount !== totalCount;
 
   return (
-    <div className="space-y-3">
+    <div className="panel p-4 shadow-panel space-y-4">
       <div className="relative">
         <svg
           className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-notion-faint pointer-events-none"
@@ -47,7 +47,7 @@ export default function BookmarkToolbar({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search by title or URL…"
-          className="input-field !pl-9"
+          className="input-field !pl-9 !bg-notion-page/50"
           aria-label="Search bookmarks"
         />
         {searchQuery && (
@@ -74,27 +74,34 @@ export default function BookmarkToolbar({
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <label className="flex items-center gap-2 text-sm text-notion-muted">
-          <span className="text-xs font-medium uppercase tracking-wider text-notion-faint">
-            Sort
-          </span>
-          <select
-            value={sort}
-            onChange={(e) => onSortChange(e.target.value as BookmarkSort)}
-            className="input-field !py-1.5 !pr-8 !w-auto min-w-[140px] text-sm cursor-pointer"
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-medium text-notion-faint mb-2">Sort by</p>
+          <div
+            role="radiogroup"
             aria-label="Sort bookmarks"
+            className="sort-segments"
           >
-            {(Object.keys(SORT_LABELS) as BookmarkSort[]).map((key) => (
-              <option key={key} value={key}>
-                {SORT_LABELS[key]}
-              </option>
+            {SORT_OPTIONS.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={sort === value}
+                aria-pressed={sort === value}
+                aria-label={SORT_LABELS[value]}
+                title={SORT_LABELS[value]}
+                onClick={() => onSortChange(value)}
+                className="sort-segment"
+              >
+                {label}
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </div>
 
         {showMatchCount && (
-          <p className="text-xs text-notion-muted">
+          <p className="text-xs text-notion-muted sm:pb-0.5 sm:text-right shrink-0">
             {filteredCount} of {totalCount} match
           </p>
         )}

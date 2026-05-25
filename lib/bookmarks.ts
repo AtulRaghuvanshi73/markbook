@@ -70,3 +70,9 @@ export const SORT_LABELS: Record<BookmarkSort, string> = {
   oldest: "Oldest first",
   "title-az": "Title A–Z",
 };
+
+export const SORT_OPTIONS: { value: BookmarkSort; label: string }[] = [
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" },
+  { value: "title-az", label: "A–Z" },
+];

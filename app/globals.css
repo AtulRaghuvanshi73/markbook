@@ -109,6 +109,28 @@ body {
     border-color: rgba(var(--c-text), 0.2);
     --tw-ring-color: rgba(var(--c-accent), 0.15);
   }
+
+  .sort-segments {
+    @apply inline-flex w-full sm:w-auto p-1 rounded-lg border gap-0.5;
+    background-color: rgba(var(--c-input-bg), 0.6);
+    border-color: var(--border-notion);
+  }
+
+  .sort-segment {
+    @apply flex-1 sm:flex-none text-xs font-medium px-3 py-1.5 rounded-md transition-colors whitespace-nowrap;
+    color: rgb(var(--c-muted));
+  }
+
+  .sort-segment:hover:not([aria-pressed="true"]) {
+    color: rgb(var(--c-text));
+    background-color: rgba(var(--c-hover), var(--c-hover-alpha));
+  }
+
+  .sort-segment[aria-pressed="true"] {
+    color: rgb(var(--c-page));
+    background-color: rgb(var(--c-btn-primary));
+    box-shadow: none;
+  }
 }
 
 @layer utilities {
