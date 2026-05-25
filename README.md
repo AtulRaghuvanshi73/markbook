@@ -1,6 +1,9 @@
 # markbook
 
-A personal bookmark manager. Sign in with Google, save links with titles, and view them on a private dashboard. Data is stored in Supabase with row-level security so each user only sees their own bookmarks.
+A personal bookmark manager. Sign in with Google, save links with titles, and manage them on a private dashboard. Data lives in Supabase with row-level security so each user only sees their own bookmarks.
+
+**Live app:** _(add your Vercel URL here)_  
+**Repo:** _(add your GitHub URL here)_
 
 ## Stack
 
@@ -8,7 +11,90 @@ A personal bookmark manager. Sign in with Google, save links with titles, and vi
 |-------|------------|
 | Frontend | Next.js 16 (App Router), React 19, Tailwind CSS |
 | Auth & database | Supabase (Auth, Postgres, Realtime) |
-| Deployment | Vercel (optional) |
+| Deployment | Vercel |
+
+## Bonus feature
+
+### Search and filter bookmarks
+
+The take-home asks for one small feature that meaningfully improves the product. I chose **instant search** over the bookmark list.
+
+**What it does**
+
+- A search field on the dashboard filters bookmarks by **title** or **URL** as you type (client-side, no extra API calls).
+- Shows how many results match when a query is active (e.g. “2 of 8 match”).
+- A dedicated **No matches** empty state when the filter returns nothing, separate from the “no bookmarks yet” state.
+
+**Why this feature**
+
+Bookmark lists grow quickly. Without search, users scroll or mentally scan every row. Search is the highest-leverage addition for a bookmark app: it is easy to demo, works entirely on data already loaded, and mirrors how people actually find saved links. Sorting and copy-to-clipboard help too, but search solves the core “where is that link?” problem first.
+
+**Implementation**
+
+- UI: `components/BookmarkToolbar.tsx`
+- Logic: `filterBookmarks()` in `lib/bookmarks.ts`
+- Wired in `BookmarkDashboard.tsx` via `useMemo` so filtering stays in sync with Realtime updates
+
+### Additional enhancements (not the primary bonus)
+
+These ship alongside search to round out day-to-day use:
+
+| Feature | Why |
+|---------|-----|
+| **Sort** (newest / oldest / title A–Z) | Complements search when you want a different view of the same set |
+| **Copy link** | One-click copy on each row — common action when sharing or pasting elsewhere |
+| **Duplicate URL detection** | Prevents clutter; normalizes host, `www.`, and trailing slashes before comparing |
+| **Dark mode** | UI polish — system preference + manual toggle, persisted in `localStorage` |
+
+## Supabase auth and Row Level Security
+
+### Google OAuth
+
+- Only Google sign-in (no email/password). `LoginPage` calls `signInWithOAuth({ provider: "google" })` with `redirectTo` from `lib/site-url.ts`.
+- `app/auth/callback/route.ts` exchanges the OAuth `code` for a session via `exchangeCodeForSession`.
+- `proxy.ts` refreshes the session on each request and redirects unauthenticated users away from `/dashboard`.
+
+### RLS policies
+
+Policies are defined in `supabase-schema.sql` and enforced in Postgres — not only in the UI.
+
+| Policy | Operation | Rule |
+|--------|-----------|------|
+| Users can view their own bookmarks | `SELECT` | `auth.uid() = user_id` |
+| Users can insert their own bookmarks | `INSERT` | `WITH CHECK (auth.uid() = user_id)` |
+| Users can delete their own bookmarks | `DELETE` | `auth.uid() = user_id` |
+
+**Why this is correct**
+
+- Every row is tied to `auth.users(id)` via `user_id`.
+- `auth.uid()` comes from the signed-in JWT, so User A cannot read, insert, or delete User B’s rows even with direct API access.
+- The anon key is safe to expose in the browser because RLS is the real gate; the frontend only hides UI the user should not see.
+
+## Real-time sync
+
+**What is used**
+
+- Supabase Realtime `postgres_changes` on the `bookmarks` table.
+- The table is added to the `supabase_realtime` publication in `supabase-schema.sql`.
+
+**How it works**
+
+In `BookmarkDashboard.tsx`:
+
+1. Initial list is loaded on the server in `app/dashboard/page.tsx`.
+2. On mount, a channel subscribes with `filter: user_id=eq.${userId}` so only the current user’s rows are streamed.
+3. Handlers update local state for `INSERT`, `UPDATE`, and `DELETE`.
+4. Search and sort run on that state via `useMemo`, so a new bookmark from another tab appears in the filtered view immediately.
+
+**Subscription cleanup**
+
+```ts
+return () => {
+  supabase.removeChannel(channel);
+};
+```
+
+The cleanup runs when the dashboard unmounts or `userId` changes, so tabs do not leak channels.
 
 ## Architecture
 
@@ -19,66 +105,72 @@ Browser
    │
    ├─ Server Components (pages) ──► Supabase (server client, cookies)
    │
-   ├─ Client Components (forms, list) ──► Supabase (browser client)
+   ├─ Client Components (forms, list, toolbar) ──► Supabase (browser client)
    │
    └─ proxy.ts (every request) ──► refresh session, route guards
 ```
-
-The app uses the Next.js App Router. Server components load the signed-in user and initial bookmark list. Client components handle login, form submission, deletes, and live updates. A single `proxy.ts` file runs on each request to keep the auth session fresh and enforce access rules.
 
 ### Directory layout
 
 ```
 app/
-  page.tsx              Home: login or redirect to dashboard
-  dashboard/page.tsx    Protected bookmark UI (server-fetched data)
-  auth/callback/route.ts OAuth code exchange
-  layout.tsx            Root layout, theme provider
+  page.tsx                  Home: login or redirect
+  dashboard/page.tsx        Protected dashboard (server-fetched bookmarks)
+  auth/callback/route.ts    OAuth code exchange
+  layout.tsx                Root layout, theme
 components/
-  LoginPage.tsx         Google sign-in
-  BookmarkDashboard.tsx List + Realtime subscription
-  BookmarkForm.tsx      Create bookmarks
-  BookmarkList.tsx      Display and delete
-  Header.tsx            User menu and sign out
+  LoginPage.tsx             Google sign-in
+  BookmarkDashboard.tsx     State, Realtime, search/sort pipeline
+  BookmarkToolbar.tsx         Search + sort controls
+  BookmarkForm.tsx            Add bookmark + duplicate check
+  BookmarkList.tsx          List, empty states
+  BookmarkItem.tsx          Row actions: copy, open, delete
+  Header.tsx                Profile + sign out + theme toggle
 lib/
-  supabase/
-    server.ts           Server-side Supabase client (cookies)
-    client.ts           Browser Supabase client
-    middleware.ts       Session refresh and redirects
-  site-url.ts           OAuth redirect URL helpers
-  auth-redirect.ts      Normalizes OAuth callback URLs
-  theme.ts              Light/dark theme utilities
-proxy.ts                Request proxy (session + route protection)
-supabase-schema.sql     Table, indexes, RLS policies, Realtime
+  bookmarks.ts              Search, sort, duplicate URL helpers
+  supabase/                 Server, browser, and middleware clients
+  site-url.ts               OAuth redirect URLs
+  auth-redirect.ts          OAuth callback normalization
+  theme.ts                  Light/dark theme
+proxy.ts                    Session refresh + route protection
+supabase-schema.sql         Table, RLS, Realtime publication
 ```
 
 ### Authentication flow
 
-1. Unauthenticated users land on `/` and see the login page.
-2. **Continue with Google** starts Supabase OAuth; the redirect target is `/auth/callback` on the current origin (localhost in dev).
-3. `app/auth/callback/route.ts` exchanges the `code` for a session and redirects to `/dashboard`.
-4. `proxy.ts` calls `updateSession` on every matched request: refreshes cookies, blocks `/dashboard` for guests, and sends signed-in users away from `/` to `/dashboard`.
-5. If Supabase returns the OAuth `code` on `/` instead of `/auth/callback`, `auth-redirect.ts` rewrites the request to the callback route.
+1. Guest lands on `/` → login page.
+2. Google OAuth → `/auth/callback` → session cookie → `/dashboard`.
+3. `proxy.ts` blocks `/dashboard` without a session and sends signed-in users from `/` to `/dashboard`.
+4. If Supabase returns `?code=` on `/`, `auth-redirect.ts` forwards to `/auth/callback`.
 
-### Data model
+## Problems encountered and fixes
 
-The `bookmarks` table stores `id`, `user_id`, `url`, `title`, and `created_at`. Row Level Security limits all operations to rows where `auth.uid() = user_id`.
+**OAuth redirect mismatch (localhost vs production)**  
+Supabase and Google require exact redirect URLs. Hard-coding production URLs broke local login. Fix: `getSiteUrl()` uses `window.location.origin` in the browser, `http://localhost:3000` in development, and `NEXT_PUBLIC_SITE_URL` only on Vercel — documented in `.env.example`.
 
-- **Read path:** `dashboard/page.tsx` loads bookmarks on the server, ordered newest first.
-- **Write path:** `BookmarkForm` inserts via the browser client; deletes go through `BookmarkList`.
-- **Live updates:** `BookmarkDashboard` subscribes to Supabase Realtime on `bookmarks` filtered by `user_id`, so the list stays in sync across tabs without a full reload.
+**OAuth code landing on `/` instead of `/auth/callback`**  
+Supabase sometimes redirects to the site root with `?code=`. Fix: `authCallbackRedirect()` in `proxy.ts` rewrites those requests to `/auth/callback`.
 
-### Theming
+**Realtime duplicate rows after insert**  
+Both the form callback and Realtime `INSERT` could add the same bookmark. Fix: dedupe by `id` in `handleBookmarkAdded` and when applying Realtime payloads.
 
-Light and dark mode use a small inline script in `layout.tsx` to avoid a flash of the wrong theme, plus `ThemeProvider` and `ThemeToggle` for persistence in `localStorage`.
+**Theme flash on load**  
+Dark/light toggled after hydration caused a flash. Fix: inline script in `layout.tsx` applies the stored or system theme before paint.
 
-## Prerequisites
+## If I had more time
+
+- **Unique URL constraint in the database** — duplicate detection is client-side today; a unique index on `(user_id, normalized_url)` would enforce it server-side.
+- **Edit bookmarks** — update title or URL in place.
+- **Tags or folders** — organize beyond a flat list.
+- **E2E tests** — Playwright flow for login, add, search, delete, and cross-tab Realtime.
+
+## Local setup
+
+### Prerequisites
 
 - Node.js 18+
 - A [Supabase](https://supabase.com) project
 - Google OAuth credentials (for Supabase Auth)
-
-## Local setup
 
 ### 1. Clone and install
 
@@ -91,53 +183,49 @@ npm install
 ### 2. Configure Supabase
 
 1. Create a project in the Supabase dashboard.
-2. Open **SQL Editor** and run the contents of `supabase-schema.sql` to create the `bookmarks` table, RLS policies, and Realtime publication.
-3. Under **Authentication → Providers**, enable **Google** and add your OAuth client ID and secret from [Google Cloud Console](https://console.cloud.google.com/).
-4. Under **Authentication → URL Configuration**, add redirect URLs:
+2. Open **SQL Editor** and run `supabase-schema.sql` (table, RLS, Realtime).
+3. **Authentication → Providers** — enable Google with your OAuth client ID and secret.
+4. **Authentication → URL Configuration** — add:
    - `http://localhost:3000/auth/callback`
-   - (add your production URL later when you deploy)
+   - `https://<your-vercel-app>/auth/callback` (after deploy)
 
 ### 3. Environment variables
-
-Copy the example file and fill in your Supabase values:
 
 ```bash
 cp .env.example .env.local
 ```
-
-Edit `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-Find the URL and anon key under **Project Settings → API** in Supabase.
+For local dev, do **not** set `NEXT_PUBLIC_SITE_URL`.
 
-For local development, do **not** set `NEXT_PUBLIC_SITE_URL`. The app uses `http://localhost:3000` automatically so OAuth stays on localhost.
-
-### 4. Run the dev server
+### 4. Run
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), sign in with Google, and add bookmarks on the dashboard.
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start development server |
+| `npm run dev` | Development server |
 | `npm run build` | Production build |
-| `npm run start` | Run production server locally |
-| `npm run lint` | Run ESLint |
+| `npm run start` | Run production build locally |
+| `npm run lint` | ESLint |
 
 ## Production (Vercel)
 
 1. Deploy the repo to Vercel.
-2. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in the Vercel project environment.
-3. Set `NEXT_PUBLIC_SITE_URL` to your production origin (no trailing slash), e.g. `https://your-app.vercel.app`.
-4. Add the same production callback URL in Supabase **Authentication → URL Configuration**: `https://your-app.vercel.app/auth/callback`.
+2. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Set `NEXT_PUBLIC_SITE_URL` to your production origin (no trailing slash).
+4. Add the production callback URL in Supabase (same path as local, with your domain).
 
+## Loom walkthrough
 
+_(add your Loom link here — under 5 minutes: app demo, auth, RLS, Realtime, bonus search, code tour)_

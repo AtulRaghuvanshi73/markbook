@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import {
+  filterBookmarks,
+  sortBookmarks,
+  type Bookmark,
+  type BookmarkSort,
+} from "@/lib/bookmarks";
 import BookmarkForm from "./BookmarkForm";
 import BookmarkList from "./BookmarkList";
+import BookmarkToolbar from "./BookmarkToolbar";
 
-export interface Bookmark {
-  id: string;
-  user_id: string;
-  url: string;
-  title: string;
-  created_at: string;
-}
+export type { Bookmark };
 
 interface BookmarkDashboardProps {
   initialBookmarks: Bookmark[];
@@ -23,6 +24,13 @@ export default function BookmarkDashboard({
   userId,
 }: BookmarkDashboardProps) {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>(initialBookmarks);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sort, setSort] = useState<BookmarkSort>("newest");
+
+  const displayedBookmarks = useMemo(() => {
+    const filtered = filterBookmarks(bookmarks, searchQuery);
+    return sortBookmarks(filtered, sort);
+  }, [bookmarks, searchQuery, sort]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -86,10 +94,24 @@ export default function BookmarkDashboard({
         </p>
       </div>
 
-      <BookmarkForm onBookmarkAdded={handleBookmarkAdded} />
+      <BookmarkForm
+        onBookmarkAdded={handleBookmarkAdded}
+        existingBookmarks={bookmarks}
+      />
+
+      <BookmarkToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        sort={sort}
+        onSortChange={setSort}
+        totalCount={bookmarks.length}
+        filteredCount={displayedBookmarks.length}
+      />
 
       <BookmarkList
-        bookmarks={bookmarks}
+        bookmarks={displayedBookmarks}
+        totalCount={bookmarks.length}
+        searchQuery={searchQuery}
         onBookmarkDeleted={handleBookmarkDeleted}
       />
     </div>

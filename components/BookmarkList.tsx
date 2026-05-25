@@ -1,18 +1,22 @@
 "use client";
 
-import type { Bookmark } from "./BookmarkDashboard";
+import type { Bookmark } from "@/lib/bookmarks";
 import BookmarkItem from "./BookmarkItem";
 
 interface BookmarkListProps {
   bookmarks: Bookmark[];
+  totalCount: number;
+  searchQuery: string;
   onBookmarkDeleted: (id: string) => void;
 }
 
 export default function BookmarkList({
   bookmarks,
+  totalCount,
+  searchQuery,
   onBookmarkDeleted,
 }: BookmarkListProps) {
-  if (bookmarks.length === 0) {
+  if (totalCount === 0) {
     return (
       <div className="panel py-12 px-6 text-center shadow-panel">
         <div className="w-10 h-10 rounded-xl bg-notion-surface flex items-center justify-center mx-auto mb-4">
@@ -38,10 +42,22 @@ export default function BookmarkList({
     );
   }
 
+  if (bookmarks.length === 0) {
+    return (
+      <div className="panel py-10 px-6 text-center shadow-panel">
+        <p className="text-sm font-medium text-notion">No matches</p>
+        <p className="text-sm text-notion-muted mt-1">
+          Nothing matches &ldquo;{searchQuery.trim()}&rdquo;. Try another search
+          or clear the filter.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <p className="text-xs font-medium uppercase tracking-wider text-notion-faint mb-3">
-        All bookmarks
+        {searchQuery.trim() ? "Results" : "All bookmarks"}
       </p>
       <div className="space-y-2">
         {bookmarks.map((bookmark) => (

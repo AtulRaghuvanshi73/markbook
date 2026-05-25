@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Bookmark } from "./BookmarkDashboard";
+import { isDuplicateUrl } from "@/lib/bookmarks";
+import type { Bookmark } from "@/lib/bookmarks";
 
 interface BookmarkFormProps {
   onBookmarkAdded: (bookmark: Bookmark) => void;
+  existingBookmarks: Bookmark[];
 }
 
 type FeedbackState =
@@ -22,7 +24,10 @@ function isValidUrl(url: string): boolean {
   }
 }
 
-export default function BookmarkForm({ onBookmarkAdded }: BookmarkFormProps) {
+export default function BookmarkForm({
+  onBookmarkAdded,
+  existingBookmarks,
+}: BookmarkFormProps) {
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,6 +66,15 @@ export default function BookmarkForm({ onBookmarkAdded }: BookmarkFormProps) {
     setFeedback(null);
 
     if (!validate()) return;
+
+    if (isDuplicateUrl(url.trim(), existingBookmarks)) {
+      setUrlError("You already saved this link");
+      setFeedback({
+        type: "error",
+        message: "This URL is already in your bookmarks.",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -119,6 +133,7 @@ export default function BookmarkForm({ onBookmarkAdded }: BookmarkFormProps) {
             onChange={(e) => {
               setUrl(e.target.value);
               if (urlError) setUrlError(null);
+              if (feedback?.type === "error") setFeedback(null);
             }}
             placeholder="https://example.com"
             className={`input-field ${urlError ? "!border-red-300 dark:!border-red-800 focus:!ring-red-500/20" : ""}`}

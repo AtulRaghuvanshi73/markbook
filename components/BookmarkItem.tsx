@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Bookmark } from "./BookmarkDashboard";
+import type { Bookmark } from "@/lib/bookmarks";
 
 interface BookmarkItemProps {
   bookmark: Bookmark;
@@ -50,6 +50,17 @@ export default function BookmarkItem({ bookmark, onDeleted }: BookmarkItemProps)
   const [showConfirm, setShowConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [faviconError, setFaviconError] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(bookmark.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   const handleConfirmDelete = async () => {
     setIsDeleting(true);
@@ -129,6 +140,47 @@ export default function BookmarkItem({ bookmark, onDeleted }: BookmarkItemProps)
         </div>
 
         <div className="flex items-center gap-0.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className={`p-1.5 rounded-md transition-colors ${
+              copied
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-notion-faint hover:text-notion hover:bg-notion-surface"
+            }`}
+            title={copied ? "Copied" : "Copy link"}
+            aria-label={copied ? "Link copied" : "Copy link"}
+          >
+            {copied ? (
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4.5 12.75l6 6 9-13.5"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125H5.625c-.621 0-1.125-.504-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125h3.375m6 0V4.875c0-.621.504-1.125 1.125-1.125h3.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-3.375c-.621 0-1.125-.504-1.125-1.125V9.75m-6 0h6"
+                />
+              </svg>
+            )}
+          </button>
           <a
             href={bookmark.url}
             target="_blank"
