@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
@@ -30,6 +30,7 @@ function BookmarkIcon({ className }: { className?: string }) {
 
 export default function Header({ user }: HeaderProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -47,6 +48,15 @@ export default function Header({ user }: HeaderProps) {
     user.user_metadata?.name ||
     user.email?.split("@")[0] ||
     "User";
+  const avatarInitial = (displayName.trim().charAt(0) || "U").toUpperCase();
+  const validAvatarUrl =
+    typeof avatarUrl === "string" && avatarUrl.trim().length > 0
+      ? avatarUrl
+      : null;
+
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [validAvatarUrl]);
 
   return (
     <header className="sticky top-0 z-10 border-b border-notion bg-notion-page/70 backdrop-blur-md">
@@ -68,16 +78,17 @@ export default function Header({ user }: HeaderProps) {
 
         <div className="flex items-center gap-2 shrink-0">
           <div className="hidden sm:flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border border-notion bg-notion-surface/50">
-            {avatarUrl ? (
+            {validAvatarUrl && !avatarLoadFailed ? (
               <img
-                src={avatarUrl}
+                src={validAvatarUrl}
                 alt={displayName}
                 className="w-5 h-5 rounded-full"
+                onError={() => setAvatarLoadFailed(true)}
               />
             ) : (
               <div className="w-5 h-5 rounded-full bg-notion-surface flex items-center justify-center">
                 <span className="text-[10px] font-medium text-notion-muted">
-                  {displayName[0].toUpperCase()}
+                  {avatarInitial}
                 </span>
               </div>
             )}
