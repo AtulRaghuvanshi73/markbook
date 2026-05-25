@@ -2,8 +2,9 @@
 
 A personal bookmark manager. Sign in with Google, save links with titles, and manage them on a private dashboard. Data lives in Supabase with row-level security so each user only sees their own bookmarks.
 
-**Live app:** _(add your Vercel URL here)_  
-**Repo:** _(add your GitHub URL here)_
+**Live app:** https://markbook-bice.vercel.app/
+
+**Repo:** https://github.com/AtulRaghuvanshi73/markbook
 
 ## Stack
 
