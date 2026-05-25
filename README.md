@@ -226,6 +226,3 @@ Open [http://localhost:3000](http://localhost:3000).
 3. Set `NEXT_PUBLIC_SITE_URL` to your production origin (no trailing slash).
 4. Add the production callback URL in Supabase (same path as local, with your domain).
 
-## Loom walkthrough
-
-_(add your Loom link here — under 5 minutes: app demo, auth, RLS, Realtime, bonus search, code tour)_
